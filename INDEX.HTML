@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+ <style type="text/css">
+
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+}
+
+.container {
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.search-box {
+    margin-bottom: 20px;
+}
+
+.search-box input {
+    padding: 10px;
+    width: 70%;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.search-box button {
+    padding: 10px;
+    width: 25%;
+    border: none;
+    border-radius: 5px;
+    background-color: #0072ff;
+    color: white;
+    cursor: pointer;
+}
+
+.search-box button:hover {
+    background-color: #005bb5;
+}
+
+.weather-info {
+    margin-top: 20px;
+}
+
+
+
+
+ </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <div class="search-box">
+            <input type="text" id="locationInput" placeholder="Enter location">
+            <button id="searchButton">Search</button>
+        </div>
+        <div class="weather-info" id="weatherInfo">
+            <p>Loading weather data...</p>
+        </div>
+    </div>
+    <script >
+
+document.addEventListener('DOMContentLoaded', () => {
+    const apiKey = 'YOUR_OPENWEATHERMAP_API_KEY';
+    const weatherInfo = document.getElementById('weatherInfo');
+    const locationInput = document.getElementById('locationInput');
+    const searchButton = document.getElementById('searchButton');
+
+    searchButton.addEventListener('click', () => {
+        const location = locationInput.value;
+        if (location) {
+            fetchWeatherData(location);
+        } else {
+            alert('Please enter a location');
+        }
+    });
+
+    function fetchWeatherData(location) {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${apiKey}&units=metric`;
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.cod === 200) {
+                    displayWeatherData(data);
+                } else {
+                    weatherInfo.innerHTML = `<p>${data.message}</p>`;
+                }
+            })
+            .catch(error => {
+                weatherInfo.innerHTML = `<p>Unable to fetch weather data</p>`;
+                console.error('Error fetching weather data:', error);
+            });
+    }
+
+    function displayWeatherData(data) {
+        const { name, main, weather } = data;
+        weatherInfo.innerHTML = `
+            <h2>${name}</h2>
+            <p>${weather[0].description}</p>
+            <p>Temperature: ${main.temp}°C</p>
+            <p>Humidity: ${main.humidity}%</p>
+        `;
+    }
+
+    // Optional: Fetch weather data based on user's geolocation
+    if ('geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => displayWeatherData(data))
+                .catch(error => {
+                    weatherInfo.innerHTML = `<p>Unable to fetch weather data</p>`;
+                    console.error('Error fetching weather data:', error);
+                });
+        });
+    }
+});
+
+
+
+
+    </script>
+</body>
+</html>
